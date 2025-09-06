@@ -1,11 +1,28 @@
-const express = require('express')
+const express = require("express");
 const app = express();
-const fs = require('fs');
-const os = require('os');
-const port = process.env.PORT || 3000;
-app.get("/",(req,res)=>{
-  res.end("Working");
-})
-app.listen(port,()=>{
-  console.log("server activated")
-})
+const mongoose = require("mongoose");
+require("dotenv").config();
+const port = process.env.PORT || 3004;
+
+mongoose
+  .connect(process.env.key)
+  .then(() => console.log("MongoDB connection successful"))
+  .catch((err) => console.error("MongoDB connection error", err));
+
+mongoose.connection.on("disconnect", () => {
+  console.warn("MongoDB disconnected");
+});
+
+process.on("SIGINT", async () => {
+  await mongoose.connection.close();
+  console.log("MongoDB connection closed");
+  process.exit(0);
+});
+
+app.get("/", (req, res) => {
+  res.send("Working Database connected");
+});
+
+app.listen(port, () => {
+  console.log("server activated");
+});
